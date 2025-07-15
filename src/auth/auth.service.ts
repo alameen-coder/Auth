@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SignUpDto } from './dto/signup.dto';
@@ -59,7 +60,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new ForbiddenException('Invalid credentials');
+      throw new ForbiddenException('User not found');
     }
 
     // const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -77,5 +78,27 @@ export class AuthService {
     return {
       access_token: token,
     };
+  }
+
+  async deleteUser(userId: number) {
+    console.log('Attempting to delete user with ID:', userId);
+    if (!userId) {
+      throw new ForbiddenException('User ID is required');
+    }
+    try {
+      const user = await this.prisma.user.delete({
+        where: { id: userId },
+      });
+
+      return {
+        message: 'User deleted successfully',
+        user: {
+          id: user.id,
+          email: user.email,
+        },
+      };
+    } catch (error) {
+      throw new ForbiddenException('Failed to delete user');
+    }
   }
 }
